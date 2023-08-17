@@ -428,7 +428,7 @@ if __name__ == "__main__":
     if not external_rtl_tcp:
         # Find USB Devices
         usb_device_index = ''
-        usb_devices = find_rtl_sdr_devices(config['device_ids_path'])
+        usb_devices = find_rtl_sdr_devices(config['general']['device_ids_path'])
         if len(usb_devices) < 1:
             log_message('No RTL-SDR USB devices found. Exiting...')
             sys.exit(1)
