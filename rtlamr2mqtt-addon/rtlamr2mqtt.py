@@ -56,9 +56,9 @@ def load_id_file(sdl_ids_file):
     return device_ids
 
 # Find RTL SDR device
-def find_rtl_sdr_devices():
+def find_rtl_sdr_devices(id_file):
     # Load the list of all supported device ids
-    DEVICE_IDS = load_id_file('/var/lib/sdl_ids.txt')
+    DEVICE_IDS = load_id_file(id_file)
     devices_found = {}
     index = -1
     for dev in usb.core.find(find_all = True):
@@ -355,7 +355,7 @@ signal.signal(signal.SIGINT, shutdown)
 def listen_mode():
     log_message('Starting in LISTEN ONLY Mode...')
     msgtype = os.environ.get('RTL_MSGTYPE', 'all')
-    rtlamr_cmd = ['/usr/bin/rtlamr', '-msgtype={}'.format(msgtype), '-format=json']
+    rtlamr_cmd = ['rtlamr', '-msgtype={}'.format(msgtype), '-format=json']
     external_rtl_tcp = False
     if running_as_addon:
         config = load_config(sys.argv)
@@ -378,7 +378,7 @@ def listen_mode():
         external_rtl_tcp = True
     if not external_rtl_tcp:
         external_rtl_tcp = False
-        rtltcp_cmd = '/usr/bin/rtl_tcp {}'.format(rtltcp_args)
+        rtltcp_cmd = 'rtl_tcp {}'.format(rtltcp_args)
         log_message('Starting rtl_tcp with {}'.format(rtltcp_cmd))
         rtltcp = subprocess.Popen(rtltcp_cmd.split(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True, universal_newlines=True)
         sleep(2)
@@ -428,7 +428,7 @@ if __name__ == "__main__":
     if not external_rtl_tcp:
         # Find USB Devices
         usb_device_index = ''
-        usb_devices = find_rtl_sdr_devices()
+        usb_devices = find_rtl_sdr_devices(config['device_ids_path'])
         if len(usb_devices) < 1:
             log_message('No RTL-SDR USB devices found. Exiting...')
             sys.exit(1)
@@ -488,8 +488,8 @@ if __name__ == "__main__":
             rtlamr_custom = config['custom_parameters']['rtlamr'].split(' ')
 
     if not external_rtl_tcp:
-        rtltcp_cmd = ['/usr/bin/rtl_tcp'] + [usb_device_index] + rtltcp_custom
-    rtlamr_cmd = ['/usr/bin/rtlamr', '-msgtype={}'.format(','.join(protocols)), '-format=json', '-filterid={}'.format(','.join(meters.keys()))] + rtlamr_custom
+        rtltcp_cmd = ['rtl_tcp'] + [usb_device_index] + rtltcp_custom
+    rtlamr_cmd = ['rtlamr', '-msgtype={}'.format(','.join(protocols)), '-format=json', '-filterid={}'.format(','.join(meters.keys()))] + rtlamr_custom
     #################################################################
 
     # Main loop
